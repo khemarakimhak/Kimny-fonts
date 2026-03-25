@@ -6,13 +6,13 @@
     <style>
         body { background: #ffe7e5; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
         .ui { background: white; padding: 15px; border-radius: 12px; width: 95%; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 10px; box-sizing: border-box; }
-        .switch-btn { 
-            width: 100%; padding: 8px; background: #f0f0f0; color: #333; 
-            border: 1px solid #ccc; border-radius: 8px; margin-bottom: 10px; 
-            font-size: 12px; font-weight: bold; cursor: pointer; text-decoration: none;
-            display: block; text-align: center;
-        }
-        input[type="text"] { width: 100%; padding: 12px; font-size: 18px; border: 2px solid #1cb3b3; border-radius: 8px; box-sizing: border-box; }
+        .switch-btn { width: 100%; padding: 8px; background: #f0f0f0; color: #333; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 10px; font-size: 12px; font-weight: bold; cursor: pointer; text-decoration: none; display: block; text-align: center; }
+        
+        /* Input Container with Clear Button */
+        .input-wrapper { position: relative; width: 100%; }
+        input[type="text"] { width: 100%; padding: 12px 40px 12px 12px; font-size: 18px; border: 2px solid #1cb3b3; border-radius: 8px; box-sizing: border-box; }
+        .clear-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: #ccc; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-weight: bold; display: none; }
+
         .slider-container { margin-top: 15px; display: flex; flex-direction: column; gap: 5px; }
         .slider-label { display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; color: #333; }
         input[type="range"] { width: 100%; cursor: pointer; accent-color: #1cb3b3; }
@@ -25,7 +25,10 @@
 
     <div class="ui">
         <a href="khmer.html" class="switch-btn">🇰🇭 SWITCH TO KHMER FONT</a>
-        <input type="text" id="nameIn" placeholder="Type English Name..." oninput="draw()">
+        <div class="input-wrapper">
+            <input type="text" id="nameIn" placeholder="Type English Name..." oninput="updateUI()">
+            <button class="clear-btn" id="clearBtn" onclick="clearInput()">✕</button>
+        </div>
         
         <div class="slider-container">
             <div class="slider-label"><span>Font Size</span> <span id="sizeVal">100px</span></div>
@@ -43,12 +46,23 @@
         const ctx = canvas.getContext('2d');
         let templateImg = null;
 
-        // Settings
         const cols = 4; 
         const startX = 400; 
         const startY = 400; 
         const xGap = 525;  
-        const yGap = 253;   
+        const yGap = 253; 
+
+        function updateUI() {
+            const input = document.getElementById('nameIn');
+            const clearBtn = document.getElementById('clearBtn');
+            clearBtn.style.display = input.value.length > 0 ? "block" : "none";
+            draw();
+        }
+
+        function clearInput() {
+            document.getElementById('nameIn').value = "";
+            updateUI();
+        }
 
         async function loadFonts() {
             const status = document.getElementById('fontStatus');
@@ -68,13 +82,7 @@
 
         function init() {
             const img = new Image();
-            img.onload = () => { 
-                templateImg = img; 
-                canvas.width = img.width; 
-                canvas.height = img.height; 
-                draw(); 
-            };
-            // Points to the file in your GitHub folder
+            img.onload = () => { templateImg = img; canvas.width = img.width; canvas.height = img.height; draw(); };
             img.src = "EName.jpg"; 
             loadFonts();
         }
@@ -88,22 +96,16 @@
             const baseSize = parseFloat(document.getElementById('fontSize').value);
             document.getElementById('sizeVal').innerText = baseSize + "px";
             if (!name) return;
-
             ctx.fillStyle = "#22b8b8"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-
             for (let i = 0; i < 30; i++) {
                 let fontNum = i + 1;
-                let row = Math.floor(i / cols);
-                let col = i % cols;
-                let posX = startX + (col * xGap);
-                let posY = startY + (row * yGap);
-
+                let row = Math.floor(i / cols); let col = i % cols;
+                let posX = startX + (col * xGap); let posY = startY + (row * yGap);
                 let currentFontSize = baseSize;
                 if ([13, 20, 10, 4, 22, 26].includes(fontNum)) currentFontSize = baseSize * 1.25;
                 if ([19, 30].includes(fontNum)) currentFontSize = baseSize * 1.5;
                 if ([29].includes(fontNum)) currentFontSize = baseSize * 0.75;
-                
-                ctx.font = `${currentFontSize}px f${fontNum}`; 
+                ctx.font = `${currentFontSize}px f${fontNum}`;
                 ctx.fillText(name, posX, posY);
             }
         }

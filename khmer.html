@@ -6,13 +6,12 @@
     <style>
         body { background: #ffe7e5; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
         .ui { background: white; padding: 15px; border-radius: 12px; width: 95%; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 10px; box-sizing: border-box; }
-        .switch-btn { 
-            width: 100%; padding: 8px; background: #f0f0f0; color: #333; 
-            border: 1px solid #ccc; border-radius: 8px; margin-bottom: 10px; 
-            font-size: 12px; font-weight: bold; cursor: pointer; text-decoration: none;
-            display: block; text-align: center;
-        }
-        input[type="text"] { width: 100%; padding: 12px; font-size: 18px; border: 2px solid #22b9b9; border-radius: 8px; box-sizing: border-box; }
+        .switch-btn { width: 100%; padding: 8px; background: #f0f0f0; color: #333; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 10px; font-size: 12px; font-weight: bold; cursor: pointer; text-decoration: none; display: block; text-align: center; }
+        
+        .input-wrapper { position: relative; width: 100%; }
+        input[type="text"] { width: 100%; padding: 12px 40px 12px 12px; font-size: 18px; border: 2px solid #22b9b9; border-radius: 8px; box-sizing: border-box; }
+        .clear-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: #ccc; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-weight: bold; display: none; }
+
         .slider-container { margin-top: 15px; display: flex; flex-direction: column; gap: 5px; }
         .slider-label { display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; color: #333; }
         input[type="range"] { width: 100%; cursor: pointer; accent-color: #22b9b9; }
@@ -25,7 +24,10 @@
 
     <div class="ui">
         <a href="index.html" class="switch-btn">🇬🇧 SWITCH TO ENGLISH FONT</a>
-        <input type="text" id="nameIn" placeholder="Type Khmer Name..." oninput="draw()">
+        <div class="input-wrapper">
+            <input type="text" id="nameIn" placeholder="Type Khmer Name..." oninput="updateUI()">
+            <button class="clear-btn" id="clearBtn" onclick="clearInput()">✕</button>
+        </div>
         
         <div class="slider-container">
             <div class="slider-label"><span>Font Size</span> <span id="sizeVal">100px</span></div>
@@ -47,7 +49,19 @@
         const startX = 380; 
         const startY = 430; 
         const xGap = 525;  
-        const yGap = 250;   
+        const yGap = 250;  
+
+        function updateUI() {
+            const input = document.getElementById('nameIn');
+            const clearBtn = document.getElementById('clearBtn');
+            clearBtn.style.display = input.value.length > 0 ? "block" : "none";
+            draw();
+        }
+
+        function clearInput() {
+            document.getElementById('nameIn').value = "";
+            updateUI();
+        }
 
         async function loadFonts() {
             const status = document.getElementById('fontStatus');
@@ -67,13 +81,7 @@
 
         function init() {
             const img = new Image();
-            img.onload = () => { 
-                templateImg = img; 
-                canvas.width = img.width; 
-                canvas.height = img.height; 
-                draw(); 
-            };
-            // Points to the file in your GitHub folder
+            img.onload = () => { templateImg = img; canvas.width = img.width; canvas.height = img.height; draw(); };
             img.src = "KName.jpg"; 
             loadFonts();
         }
@@ -87,15 +95,11 @@
             const size = document.getElementById('fontSize').value;
             document.getElementById('sizeVal').innerText = size + "px";
             if (!name) return;
-
             ctx.fillStyle = "#22b9b9"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-
             for (let i = 0; i < 9; i++) {
-                let row = Math.floor(i / cols);
-                let col = i % cols;
-                let posX = startX + (col * xGap);
-                let posY = startY + (row * yGap);
-                ctx.font = `${size}px k${i + 1}`; 
+                let row = Math.floor(i / cols); let col = i % cols;
+                let posX = startX + (col * xGap); let posY = startY + (row * yGap);
+                ctx.font = `${size}px k${i + 1}`;
                 ctx.fillText(name, posX, posY);
             }
         }
