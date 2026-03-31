@@ -204,8 +204,25 @@
                 ctx.font = `${currentFontSize}px f${fontNum}`;
                 ctx.strokeStyle = currentStrokeColor;
                 ctx.lineWidth = currentFontSize * 0.25; 
-                ctx.shadowColor = "rgba(0, 0, 0, 0.35)"; ctx.shadowBlur = 30; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
+
+                // Turn off native browser shadows to stop iOS from glitching
+                ctx.shadowColor = "transparent"; 
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+
+                // Draw multiple light layers slightly offset to fake a soft blur
+                ctx.strokeStyle = "rgba(0, 0, 0, 0.1)"; 
+                ctx.strokeText(name, posX + 1, posY + 1);
+                ctx.strokeText(name, posX + 2, posY + 2);
+                ctx.strokeText(name, posX + 3, posY + 3);
+                ctx.strokeText(name, posX + 4, posY + 4);
+
+                // Now draw the real colored stroke and fill on top
+                ctx.strokeStyle = currentStrokeColor;
                 ctx.strokeText(name, posX, posY);
+                ctx.fillStyle = currentFontColor;
+                ctx.fillText(name, posX, posY);
 
                 ctx.shadowColor = "transparent"; ctx.fillStyle = currentFontColor;
                 ctx.fillText(name, posX, posY);
